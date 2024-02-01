@@ -62,4 +62,36 @@ function logoutUser(req, res, next) {
   }
 }
 
-module.exports = { getUsers, getUsersByEmail, getUsersById , registerUser, loginUser, logoutUser }
+async function makeAdmin(req, res, next) {
+  try {
+    console.log(req.params.id);
+    const { id } = req.params 
+    //const user = await User.findById(req.user._id) // usuario realizando la peticion, viejo admin
+    const newAdmin = await User.findById(id);// id del nuevo admin
+    newAdmin.rol = "admin"; // Le damos el rol de admin
+    const newAdminUpdated = await User.findByIdAndUpdate(id, newAdmin, { new: true })  // y lo updateamos
+    return res.status(201).json(newAdminUpdated)
+  } catch (error) {
+    return res.status(403).json(
+      "error: " + error.message
+    )
+  }
+}
+
+async function changeRol(req, res, next) {
+  try {
+    console.log(req.params.id);
+    const { id } = req.params;
+    const newRol = req.body.newRol;
+    const UserToChange = await User.findById(id);// id del nuevo admin
+    UserToChange.rol = newRol; // Le damos el nuevo rol, que llega por ewl body de la peticion
+    const UserToChangeUpdated = await User.findByIdAndUpdate(id, UserToChange, { new: true });  // y lo updateamos
+    return res.status(201).json(UserToChangeUpdated);
+  } catch (error) {
+    return res.status(403).json(
+      "error: " + error.message
+    )
+  }
+}
+
+module.exports = { getUsers, getUsersByEmail, getUsersById, registerUser, loginUser, logoutUser, makeAdmin, changeRol }

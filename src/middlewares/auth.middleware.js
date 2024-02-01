@@ -7,10 +7,11 @@ const isAuth = async (req, res, next) => {
   try {
     const decoded = verifyToken(token, process.env.JWT_SECRET)
     req.user = await User.findById(decoded.id)
+    console.log("Usuario autenticado como registrado");
     next()
   } catch (error) {
     next(error)
   }
 }
 
-module.exports = { isAuth }
+module.exports = { isAuth };
