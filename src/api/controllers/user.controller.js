@@ -1,6 +1,7 @@
 const User = require('../models/user.model')
 const bcrypt = require('bcrypt')
 const { generateToken } = require('../../utils/token')
+const { deleteImgCloudinary } = require('../../middlewares/ficherosfiles.middleware')
 
 async function getUsers(req, res, next) {
   try {
@@ -29,14 +30,28 @@ async function getUsersById(req, res, next) {
 }
 async function registerUser(req, res, next) {
   try {
-    const user = new User(req.body)
-    const userExist = await User.findOne({ email: user.email })
-    if (userExist) return next(new Error('User already exists'))
+    const newUserCompleted = {...req.body, img:req.file.path}
+    const user = new User(newUserCompleted);
+
+    /*const userExist = await User.findOne({ email: user.email })
+    if (userExist)  {
+      deleteImgCloudinary(req?.file?.path)  // Esto para que borre la imagen ya subida
+      return next(new Error('User already exists'))
+    }*/
 
     const userDB = await user.save()
     return res.status(201).json(userDB)
   } catch (error) {
-    return next(error)
+    if (error.name === 'ValidationError') {
+      // Mongoose validation error (e.g., required field missing)
+      return res.status(400).json({ error: error.message });
+    } else if (error.code === 11000) {
+      // Duplicate key error (e.g., unique constraint violation)
+      return res.status(409).json({ error: 'Duplicate key error. Email or username already exists.' });
+    } else {
+      // Generic error handling
+      return next(error);
+    }
   }
 }
 
@@ -44,7 +59,7 @@ async function loginUser(req, res, next) {
   try {
     const user = await User.findOne({ email: req.body.email })
     if (!user) return next(new Error())
-    if (bcrypt.compareSync(req.body.contraseña, user.contraseña)) {
+    if (bcrypt.compareSync(req.body.contrasena, user.contrasena)) {
       const token = generateToken(user._id, user.email)
       return res.status(200).json(token)
     }

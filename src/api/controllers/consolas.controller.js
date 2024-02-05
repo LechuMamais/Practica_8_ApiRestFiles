@@ -20,7 +20,10 @@ const getConsolaById = async (req, res, next) => {
 
 const createConsola = async (req, res, next) => {
     try {
-        const newConsola = new Consola(req.body)
+        const newConsola = new Consola({
+            ...req.body,
+            img: req.file ? req.file.path : 'not image',
+            })
         const consola = await newConsola.save( )
         return res.status(201).json(consola);
     } catch (error) {
@@ -33,7 +36,9 @@ const updateConsola = async (req, res, next) => {
         const {id} = req.params;
         const newConsola = await new Consola(req.body);
         newConsola._id = id;
-        const consolaUpdated = await Consola.findByIdAndUpdate(id, newConsola, {new: true});
+        const consolaUpdated = await Consola.findByIdAndUpdate(id,
+            {...req.body, imagen: req.file ? req.file.path : 'not image'},
+            {new: true});
         return res.status(200).json(consolaUpdated);
     } catch (error) {
         return next(error);
@@ -43,6 +48,7 @@ const updateConsola = async (req, res, next) => {
 const deleteConsola = async (req, res, next) => {
     try {
         const consola = await Consola.findByIdAndDelete(req.params.id);
+        if (consola.imagen) deleteImgCloudinary(consola.imagen)
         return res.status(200).json(consola);
     } catch (error) {
         return next(error);
