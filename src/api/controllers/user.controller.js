@@ -1,7 +1,8 @@
 const User = require('../models/user.model')
 const bcrypt = require('bcrypt')
-const { generateToken } = require('../../utils/token')
-const { deleteImgCloudinary } = require('../../middlewares/ficherosfiles.middleware')
+const { generateToken, verifyToken } = require('../../utils/token')
+const { deleteImgCloudinary } = require('../../utils/deletefile.cloudinary')
+//const { deleteImgCloudinary } = require('../../utils/deleteImgCloudinary')
 
 async function getUsers(req, res, next) {
   try {
@@ -30,6 +31,7 @@ async function getUsersById(req, res, next) {
 }
 async function registerUser(req, res, next) {
   try {
+    console.log(req.body);
     const newUserCompleted = {...req.body, img:req.file.path}
     const user = new User(newUserCompleted);
 
@@ -79,7 +81,6 @@ function logoutUser(req, res, next) {
 
 async function makeAdmin(req, res, next) {
   try {
-    console.log(req.params.id);
     const { id } = req.params 
     //const user = await User.findById(req.user._id) // usuario realizando la peticion, viejo admin
     const newAdmin = await User.findById(id);// id del nuevo admin
@@ -95,7 +96,6 @@ async function makeAdmin(req, res, next) {
 
 async function changeRol(req, res, next) {
   try {
-    console.log(req.params.id);
     const { id } = req.params;
     const newRol = req.body.newRol;
     const UserToChange = await User.findById(id);// id del nuevo admin
@@ -109,4 +109,22 @@ async function changeRol(req, res, next) {
   }
 }
 
-module.exports = { getUsers, getUsersByEmail, getUsersById, registerUser, loginUser, logoutUser, makeAdmin, changeRol }
+async function updateImg(req, res, next) {
+  // Sólo se puede modificar la imagen del usuario propio, con el que se haya logueado
+  // Por lo tanto para updatear la img solo necesitamos el token y la imagen nueva.
+  const token = req.headers.authorization?.replace('Bearer ', '')
+  if (!token) {return res.status(401).json('Necesitas estar logueado para hacer esta petición')}
+  try {
+    const decoded = verifyToken(token, process.env.JWT_SECRET);
+    const newImg = req.file.path;
+    const userToUpdate = await User.findById(decoded.id);
+    deleteImgCloudinary(userToUpdate.img);
+    userToUpdate.img = newImg;
+    userUpdated = await User.findByIdAndUpdate(decoded.id, userToUpdate, {new:true})
+    return res.status(201).json(userToUpdate);
+  } catch (error) {
+    return res.status(403).json("error: " + error.message)
+  }
+}
+
+module.exports = { getUsers, getUsersByEmail, getUsersById, registerUser, loginUser, logoutUser, makeAdmin, changeRol, updateImg }

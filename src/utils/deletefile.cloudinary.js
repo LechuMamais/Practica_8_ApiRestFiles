@@ -1,19 +1,6 @@
-const multer = require('multer')
-const cloudinary = require('cloudinary').v2
-const { CloudinaryStorage } = require('multer-storage-cloudinary')
-
-const storage = new CloudinaryStorage({
-    cloudinary,
-    params: {
-        folder: 'Proyectos_8_ApiRestFiles',
-        allowedFormats: ['jpg', 'png', 'jpeg', 'gif']
-    }
-
-})
-const upload = multer({ storage: storage })
+const cloudinary = require('cloudinary').v2;
 
 const deleteImgCloudinary = (imgUrl) => {
-
     //----Con los siguientes métodos de JavaScript accederemos a la ruta de la imagen, su nombre, su carpeta y el id con el que se almacena en cloudinary para localizarlo nivel a nivel.
     const imgSplited = imgUrl.split('/')
     const nameSplited = imgSplited[imgSplited.length - 1].split('.')
@@ -24,14 +11,6 @@ const deleteImgCloudinary = (imgUrl) => {
     cloudinary.uploader.destroy(public_id, () => {
         console.log('Image delete in cloudinary')
     })
-}
+};
 
-const configCloudinary = () => {
-    cloudinary.config({
-        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-        api_secret: process.env.CLOUDINARY_API_SECRET,
-        api_key: process.env.CLOUDINARY_API_KEY
-    })
-}
-
-module.exports = { upload, deleteImgCloudinary, configCloudinary }
+module.exports = { deleteImgCloudinary };

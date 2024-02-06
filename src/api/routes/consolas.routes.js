@@ -1,7 +1,7 @@
 const ConsolaRoutes = require('express').Router();
 const { isAuth } = require('../../middlewares/auth.middleware');
 const { isAdmin } = require('../../middlewares/isAdmin.middleware');
-const { upload } = require('../../middlewares/ficherosfiles.middleware')
+const { upload } = require('../../middlewares/uploadfiles.middleware')
 const { getConsolaById, getConsolas, createConsola, updateConsola, deleteConsola } = require('../controllers/consolas.controller');
 
 ConsolaRoutes.get('/:id', getConsolaById);

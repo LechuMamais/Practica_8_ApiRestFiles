@@ -6,13 +6,14 @@ const { connectDB } = require("./src/config/db");
 const UserRoutes = require("./src/api/routes/user.routes");
 const GameRoutes = require("./src/api/routes/games.routes");
 const ConsolaRoutes = require("./src/api/routes/consolas.routes");
-const { configCloudinary } = require("./src/middlewares/ficherosfiles.middleware");
+const { configCloudinary } = require("./src/config/cloudinary");
+
 
 const app = express();
 app.use(cors());
 
 connectDB();
-configCloudinary()  // Esta funcion está definida en el middleware
+configCloudinary() 
 
 app.use(express.json())
 
