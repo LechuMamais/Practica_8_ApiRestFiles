@@ -4,9 +4,6 @@
 // Al final, este middleware funcionaría para indicar si hay un usuario ya registrado en la bd con ese nombre y ese email
 // Pero, por algún misterio que no he podido develar, el req le llega vacío asique directamente opté por no usarla.
 
-const multer = require('multer');
-const uploadNone = multer().none();
-
 const User = require("../api/models/user.model.js");
 
 const checkDuplicated = async (req, res, next) => {
@@ -31,4 +28,4 @@ const checkDuplicated = async (req, res, next) => {
 }
 
 
-module.exports = { checkDuplicated, uploadNone };
+module.exports = { checkDuplicated };
