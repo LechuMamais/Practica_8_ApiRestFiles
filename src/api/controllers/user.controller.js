@@ -1,4 +1,5 @@
 const User = require('../models/user.model')
+const cloudinary = require('cloudinary')
 const bcrypt = require('bcrypt')
 const { generateToken, verifyToken } = require('../../utils/token')
 const { deleteImgCloudinary } = require('../../utils/deletefile.cloudinary')
@@ -31,16 +32,18 @@ async function getUsersById(req, res, next) {
 }
 async function registerUser(req, res, next) {
   try {
-    console.log(req.body);
-    const newUserCompleted = {...req.body, img:req.file.path}
+    // Primero Subir la imagen a cloudinary
+
+    const dataUri = `data:${req.files.img[0].mimetype};base64,${req.files.img[0].buffer.toString('base64')}`;
+    const response = await cloudinary.uploader.upload(dataUri, {
+      folder: "Proyectos_8_ApiRestFiles",
+      allowedFormats: ["jpg", "png", "jpeg", "gif", "webp", "svg", "pdf"],
+    });
+
+    // Después, con la url de la imagen guardada, creamos el usuario en la BD
+
+    const newUserCompleted = {...req.body, img:response.url}
     const user = new User(newUserCompleted);
-
-    /*const userExist = await User.findOne({ email: user.email })
-    if (userExist)  {
-      deleteImgCloudinary(req?.file?.path)  // Esto para que borre la imagen ya subida
-      return next(new Error('User already exists'))
-    }*/
-
     const userDB = await user.save()
     return res.status(201).json(userDB)
   } catch (error) {

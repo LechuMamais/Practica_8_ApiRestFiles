@@ -19,7 +19,10 @@ const checkDuplicated = async (req, res, next) => {
       if (checkDuplicatedByEmail) {
         console.log('Ya existe un usuario registrado con este email');
         return res.status(400).json("Ya existe un usuario registrado con este email");
-      } else { next() }
+      } else {
+        console.log('Nombre de usuario y correo electrónico disponibles');
+        next() 
+      }
     }
 
   } catch (error) {
